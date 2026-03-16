@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>Unicorn Runner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #10142b;
+      font-family: Arial, sans-serif;
+      touch-action: none;
+    }
+
+    body {
+      overscroll-behavior: none;
+    }
+
+    #gameWrap {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #79d7ff 0%, #d8f7ff 50%, #fff6fb 100%);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .hud {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 14px 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.9);
+      border: 4px solid #fff;
+      border-radius: 16px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+      color: #523f91;
+      font-weight: 700;
+    }
+
+    .hearts {
+      display: flex;
+      gap: 6px;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .scoreBox {
+      min-width: 120px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .levelBox {
+      min-width: 90px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(20, 23, 50, 0.32);
+      z-index: 20;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .card {
+      width: min(92vw, 460px);
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 22px;
+      border: 5px solid #fff;
+      padding: 24px 20px 22px;
+      text-align: center;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 6vw, 42px);
+      line-height: 1;
+      color: #ff4db8;
+      text-shadow: 0 2px 0 #fff;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: #5f4c99;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .buttonRow {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #ff8dd5, #ff4db8);
+      color: #fff;
+    }
+
+    .secondary {
+      background: linear-gradient(180deg, #8cdcff, #58bfff);
+      color: #fff;
+    }
+
+    .smallNote {
+      margin-top: 14px;
+      color: #6f61a2;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .controls {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .leftControls,
+    .rightControls {
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .ctrlBtn {
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      border: 4px solid rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.8);
+      color: #634ea5;
+      font-size: 28px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    .ctrlBtn:active {
+      transform: translateY(2px);
+    }
+
+    @media (min-width: 900px) {
+      .ctrlBtn {
+        width: 84px;
+        height: 84px;
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameWrap">
+    <canvas id="game"></canvas>
+
+    <div class="hud">
+      <div class="panel hearts" id="hearts">💖💖💖</div>
+      <div class="panel scoreBox" id="scoreBox">Stars: 0</div>
+      <div class="panel levelBox" id="levelBox">Level 1</div>
+    </div>
+
+    <div class="overlay" id="startScreen">
+      <div class="card">
+        <h1 class="title">Unicorn Runner</h1>
+        <p class="subtitle">
+          Run, jump, collect stars, and hop through the magical rainbow portal.
+          Just cute platforming fun.
+        </p>
+        <div class="buttonRow">
+          <button class="primary" id="startBtn">Start Adventure</button>
+        </div>
+        <div class="smallNote">
+          Use left / right / jump. Falling loses a heart. Collect stars and reach the portal.
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverScreen">
+      <div class="card">
+        <h1 class="title">Great Try!</h1>
+        <p class="subtitle" id="gameOverText">You collected 0 stars.</p>
+        <div class="buttonRow">
+          <button class="primary" id="restartBtn">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="leftControls">
+        <div class="ctrlBtn" id="leftBtn">◀</div>
+        <div class="ctrlBtn" id="rightBtn">▶</div>
+      </div>
+      <div class="rightControls">
+        <div class="ctrlBtn" id="jumpBtn">▲</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const startScreen = document.getElementById("startScreen");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const gameOverText = document.getElementById("gameOverText");
+    const heartsEl = document.getElementById("hearts");
+    const scoreBox = document.getElementById("scoreBox");
+    const levelBox = document.getElementById("levelBox");
+
+    const controls = {
+      left: false,
+      right: false,
+      jumpPressed: false
+    };
+
+    const world = {
+      gravity: 0.6,
+      groundY: 0,
+      cameraX: 0,
+      width: 0,
+      level: 1
+    };
+
+    const player = {
+      x: 160,
+      y: 0,
+      w: 110,
+      h: 110,
+      vx: 0,
+      vy: 0,
+      speed: 4.6,
+      jumpPower: -12.6,
+      onGround: false,
+      facing: 1,
+      animTimer: 0,
+      frame: 0,
+      hearts: 3,
+      invuln: 0,
+      respawnX: 160,
+      respawnY: 0
+    };
+
+    let running = false;
+    let score = 0;
+    let stars = [];
+    let platforms = [];
+    let sparkles = [];
+    let rainbowTrail = [];
+    let portal = null;
+    let clouds = [];
+
+    let spriteImage = new Image();
+    let spriteLoaded = false;
+    let spriteCols = 6;
+    let spriteRows = 6;
+    let frameW = 0;
+    let frameH = 0;
+
+    function resizeCanvas() {
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      world.groundY = canvas.height - 180;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    spriteImage.onload = () => {
+      spriteLoaded = true;
+      frameW = spriteImage.width / spriteCols;
+      frameH = spriteImage.height / spriteRows;
+    };
+
+    spriteImage.onerror = () => {
+      console.warn("Could not load sprite sheet: assets/unicorn_rider_sheet.png");
+      spriteLoaded = false;
+    };
+
+    spriteImage.src = "assets/unicorn_rider_sheet.png";
+
+    function updateHud() {
+      heartsEl.textContent = "💖".repeat(Math.max(0, player.hearts));
+      scoreBox.textContent = `Stars: ${score}`;
+      levelBox.textContent = `Level ${world.level}`;
+    }
+
+    function resetPlayerPosition() {
+      player.x = player.respawnX;
+      player.y = player.respawnY;
+      player.vx = 0;
+      player.vy = 0;
+    }
+
+    function makeLevel(levelNum) {
+      world.level = levelNum;
+      world.cameraX = 0;
+      stars = [];
+      platforms = [];
+      sparkles = [];
+      rainbowTrail = [];
+      clouds = [];
+
+      const viewW = canvas.width;
+      const levelLength = Math.max(4200, viewW * 3.8 + levelNum * 450);
+      world.width = levelLength;
+
+      player.respawnX = 180;
+      player.respawnY = world.groundY - player.h;
+      resetPlayerPosition();
+
+      platforms.push({
+        x: 0,
+        y: world.groundY,
+        w: levelLength,
+        h: 180,
+        kind: "ground"
+      });
+
+      const baseY = world.groundY;
+
+      const gapBoost = Math.min((levelNum - 1) * 10, 40);
+      const layout = [
+        { x: 350,  y: baseY - 140, w: 230, h: 28 },
+        { x: 700 + gapBoost,  y: baseY - 260, w: 180, h: 28 },
+        { x: 1020 + gapBoost, y: baseY - 170, w: 220, h: 28 },
+        { x: 1360 + gapBoost, y: baseY - 310, w: 170, h: 28 },
+        { x: 1670 + gapBoost, y: baseY - 210, w: 220, h: 28 },
+        { x: 2010 + gapBoost, y: baseY - 120, w: 230, h: 28 },
+        { x: 2360 + gapBoost, y: baseY - 270, w: 180, h: 28 },
+        { x: 2680 + gapBoost, y: baseY - 170, w: 220, h: 28 },
+        { x: 3030 + gapBoost, y: baseY - 330, w: 170, h: 28 },
+        { x: 3330 + gapBoost, y: baseY - 220, w: 230, h: 28 },
+        { x: 3670 + gapBoost, y: baseY - 145, w: 240, h: 28 }
+      ];
+
+      for (const p of layout) {
+        platforms.push(p);
+      }
+
+      for (let i = 0; i < 40; i++) {
+        const x = 260 + i * 92;
+        let y = baseY - 54;
+
+        const platformAbove = platforms.find(
+          p => p.kind !== "ground" && x > p.x + 10 && x < p.x + p.w - 10
+        );
+
+        if (platformAbove && i % 2 === 0) {
+          y = platformAbove.y - 40;
+        } else if (i % 4 === 0) {
+          y = baseY - 120;
+        } else if (i % 5 === 0) {
+          y = baseY - 190;
+        }
+
+        stars.push({
+          x,
+          y,
+          r: 12,
+          collected: false,
+          bob: Math.random() * Math.PI * 2
+        });
+      }
+
+      for (let i = 0; i < 14; i++) {
+        clouds.push({
+          x: Math.random() * world.width,
+          y: 55 + Math.random() * 220,
+          w: 110 + Math.random() * 140,
+          h: 28 + Math.random() * 26,
+          speed: 0.06 + Math.random() * 0.12
+        });
+      }
+
+      portal = {
+        x: world.width - 240,
+        y: baseY - 135,
+        w: 90,
+        h: 125,
+        pulse: 0
+      };
+
+      updateHud();
+    }
+
+    function startGame() {
+      score = 0;
+      player.hearts = 3;
+      player.invuln = 0;
+      makeLevel(1);
+      startScreen.classList.add("hidden");
+      gameOverScreen.classList.add("hidden");
+      running = true;
+      updateHud();
+    }
+
+    function endGame() {
+      running = false;
+      gameOverText.textContent = `You collected ${score} stars and reached level ${world.level}.`;
+      gameOverScreen.classList.remove("hidden");
+    }
+
+    function loseHeart() {
+      if (player.invuln > 0) return;
+
+      player.hearts -= 1;
+      player.invuln = 90;
+      updateHud();
+
+      if (player.hearts <= 0) {
+        endGame();
+      } else {
+        resetPlayerPosition();
+      }
+    }
+
+    function rectsOverlap(a, b) {
+      return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+      );
+    }
+
+    function addTrail() {
+      rainbowTrail.push({
+        x: player.x + 14,
+        y: player.y + player.h * 0.62,
+        life: 16,
+        w: 30,
+        h: 10
+      });
+
+      if (rainbowTrail.length > 80) {
+        rainbowTrail.shift();
+      }
+    }
+
+    function collectStar(star) {
+      star.collected = true;
+      score += 1;
+      updateHud();
+
+      for (let i = 0; i < 16; i++) {
+        sparkles.push({
+          x: star.x,
+          y: star.y,
+          vx: (Math.random() - 0.5) * 3.5,
+          vy: -Math.random() * 2.8 - 0.5,
+          life: 24 + Math.random() * 16,
+          size: 3 + Math.random() * 4
+        });
+      }
+    }
+
+    function update() {
+      if (!running) return;
+
+      if (player.invuln > 0) player.invuln--;
+
+      const move = (controls.left ? -1 : 0) + (controls.right ? 1 : 0);
+      player.vx = move * player.speed;
+
+      if (move !== 0) {
+        player.facing = move;
+      }
+
+      if (controls.jumpPressed && player.onGround) {
+        player.vy = player.jumpPower;
+        player.onGround = false;
+      }
+
+      controls.jumpPressed = false;
+
+      player.vy += world.gravity;
+      player.x += player.vx;
+      player.y += player.vy;
+      player.onGround = false;
+
+      for (const p of platforms) {
+        const wasAbove = player.y + player.h - player.vy <= p.y;
+        const overlapsX = player.x + player.w > p.x && player.x < p.x + p.w;
+        const touchesTop =
+          player.y + player.h >= p.y &&
+          player.y + player.h <= p.y + p.h + 16;
+
+        if (wasAbove && overlapsX && touchesTop && player.vy >= 0) {
+          player.y = p.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+        }
+      }
+
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.w > world.width) player.x = world.width - player.w;
+
+      if (player.y > canvas.height + 220) {
+        loseHeart();
+      }
+
+      if (Math.abs(player.vx) > 0.1 || !player.onGround) {
+        addTrail();
+      }
+
+      player.animTimer += 1;
+      if (player.animTimer >= 7) {
+        player.animTimer = 0;
+        player.frame = (player.frame + 1) % 6;
+      }
+
+      for (const s of stars) {
+        if (s.collected) continue;
+        s.bob += 0.08;
+
+        const starBox = {
+          x: s.x - s.r,
+          y: s.y - s.r,
+          w: s.r * 2,
+          h: s.r * 2
+        };
+
+        if (rectsOverlap(player, starBox)) {
+          collectStar(s);
+        }
+      }
+
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        const sp = sparkles[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.vy += 0.06;
+        sp.life -= 1;
+        if (sp.life <= 0) sparkles.splice(i, 1);
+      }
+
+      for (let i = rainbowTrail.length - 1; i >= 0; i--) {
+        rainbowTrail[i].life -= 1;
+        if (rainbowTrail[i].life <= 0) rainbowTrail.splice(i, 1);
+      }
+
+      portal.pulse += 0.08;
+      if (rectsOverlap(player, portal)) {
+        makeLevel(world.level + 1);
+      }
+
+      const targetCam = player.x - canvas.width * 0.35;
+      world.cameraX += (targetCam - world.cameraX) * 0.08;
+      world.cameraX = Math.max(0, Math.min(world.cameraX, world.width - canvas.width));
+    }
+
+    function drawRoundedRect(x, y, w, h, r, fill) {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawCloud(x, y, w, h) {
+      ctx.fillStyle = "rgba(255,255,255,0.84)";
+      ctx.beginPath();
+      ctx.ellipse(x + w * 0.2, y + h * 0.65, w * 0.2, h * 0.35, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w * 0.48, y + h * 0.45, w * 0.29, h * 0.46, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w * 0.76, y + h * 0.64, w * 0.22, h * 0.32, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPlatform(p) {
+      const x = p.x - world.cameraX;
+      const y = p.y;
+
+      if (p.kind === "ground") {
+        ctx.fillStyle = "#83dc66";
+        ctx.fillRect(x, y, p.w, p.h);
+
+        for (let i = 0; i < p.w; i += 42) {
+          ctx.fillStyle = "#5fc64d";
+          ctx.fillRect(x + i, y, 24, 18);
+          ctx.fillStyle = "#a5f08a";
+          ctx.fillRect(x + i + 5, y + 4, 10, 10);
+        }
+
+        ctx.fillStyle = "#8e69db";
+        ctx.fillRect(x, y + 18, p.w, 8);
+        return;
+      }
+
+      drawRoundedRect(x, y, p.w, p.h, 12, "#ffe9ff");
+      ctx.fillStyle = "#ff86d1";
+      ctx.fillRect(x, y + p.h - 8, p.w, 8);
+
+      ctx.fillStyle = "#fff";
+      for (let i = 0; i < p.w; i += 22) {
+        ctx.fillRect(x + i + 5, y + 4, 8, 10);
+      }
+    }
+
+    function drawStar(s) {
+      const x = s.x - world.cameraX;
+      const y = s.y + Math.sin(s.bob) * 5;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "#ffd84e";
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const outer = i * Math.PI * 2 / 5 - Math.PI / 2;
+        const inner = outer + Math.PI / 5;
+        ctx.lineTo(Math.cos(outer) * 14, Math.sin(outer) * 14);
+        ctx.lineTo(Math.cos(inner) * 6.5, Math.sin(inner) * 6.5);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSparkles() {
+      for (const sp of sparkles) {
+        ctx.globalAlpha = Math.max(0, sp.life / 36);
+        ctx.fillStyle = "#fff6ab";
+        ctx.fillRect(sp.x - world.cameraX, sp.y, sp.size, sp.size);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawRainbowTrail() {
+      const colors = ["#ff5f9e", "#ffb84f", "#fff36a", "#71e56d", "#60b8ff", "#b56cff"];
+
+      for (const t of rainbowTrail) {
+        const alpha = t.life / 16;
+        for (let i = 0; i < colors.length; i++) {
+          ctx.globalAlpha = alpha * 0.7;
+          ctx.fillStyle = colors[i];
+          ctx.fillRect(
+            t.x - world.cameraX,
+            t.y + i * 3,
+            t.w,
+            3
+          );
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawPortal() {
+      const x = portal.x - world.cameraX;
+      const y = portal.y;
+      const pulse = Math.sin(portal.pulse) * 4;
+
+      ctx.save();
+      ctx.translate(x + portal.w / 2, y + portal.h /
