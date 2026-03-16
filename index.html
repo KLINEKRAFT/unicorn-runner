@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Unicorn Runner</title>
   <style>
     * {
@@ -19,13 +16,9 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #10142b;
       font-family: Arial, sans-serif;
+      background: #9fd8ff;
       touch-action: none;
-    }
-
-    body {
-      overscroll-behavior: none;
     }
 
     #gameWrap {
@@ -33,7 +26,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: linear-gradient(to bottom, #79d7ff 0%, #d8f7ff 50%, #fff6fb 100%);
+      background: linear-gradient(to bottom, #7ccfff 0%, #c8efff 55%, #f8ecff 100%);
     }
 
     canvas {
@@ -46,10 +39,8 @@
 
     .hud {
       position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      padding: 14px 14px 0;
+      inset: 0 0 auto 0;
+      padding: 14px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -58,32 +49,15 @@
     }
 
     .panel {
-      background: rgba(255, 255, 255, 0.9);
-      border: 4px solid #fff;
+      background: rgba(230, 225, 235, 0.92);
       border-radius: 16px;
-      padding: 10px 12px;
-      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
-      color: #523f91;
+      padding: 12px 16px;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+      color: #4b3d8f;
       font-weight: 700;
-    }
-
-    .hearts {
-      display: flex;
-      gap: 6px;
-      font-size: 24px;
-      line-height: 1;
-    }
-
-    .scoreBox {
-      min-width: 120px;
-      text-align: center;
       font-size: 18px;
-    }
-
-    .levelBox {
-      min-width: 90px;
+      min-width: 110px;
       text-align: center;
-      font-size: 18px;
     }
 
     .overlay {
@@ -92,9 +66,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      background: rgba(20, 23, 50, 0.32);
+      background: rgba(255,255,255,0.08);
       z-index: 20;
+      padding: 24px;
     }
 
     .hidden {
@@ -103,61 +77,46 @@
 
     .card {
       width: min(92vw, 460px);
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: 22px;
-      border: 5px solid #fff;
-      padding: 24px 20px 22px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 24px;
+      padding: 26px 24px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.18);
       text-align: center;
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
     }
 
     .title {
       margin: 0 0 10px;
-      font-size: clamp(28px, 6vw, 42px);
-      line-height: 1;
-      color: #ff4db8;
-      text-shadow: 0 2px 0 #fff;
+      font-size: clamp(32px, 6vw, 48px);
+      color: #ef4bb3;
+      font-weight: 800;
     }
 
     .subtitle {
       margin: 0 0 18px;
-      color: #5f4c99;
+      color: #58489f;
       font-size: 16px;
-      line-height: 1.45;
-    }
-
-    .buttonRow {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      line-height: 1.5;
     }
 
     button {
       appearance: none;
       border: 0;
-      border-radius: 16px;
-      padding: 14px 18px;
+      border-radius: 18px;
+      padding: 16px 20px;
+      width: 100%;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(180deg, #f58ed2, #ef4bb3);
+      box-shadow: 0 6px 0 rgba(0,0,0,0.14);
       cursor: pointer;
-      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
-    }
-
-    .primary {
-      background: linear-gradient(180deg, #ff8dd5, #ff4db8);
-      color: #fff;
-    }
-
-    .secondary {
-      background: linear-gradient(180deg, #8cdcff, #58bfff);
-      color: #fff;
     }
 
     .smallNote {
       margin-top: 14px;
-      color: #6f61a2;
+      color: #63579b;
       font-size: 13px;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .controls {
@@ -173,41 +132,27 @@
       pointer-events: none;
     }
 
-    .leftControls,
-    .rightControls {
+    .leftControls, .rightControls {
       display: flex;
       gap: 12px;
       pointer-events: auto;
     }
 
     .ctrlBtn {
-      width: 76px;
-      height: 76px;
+      width: 80px;
+      height: 80px;
       border-radius: 20px;
-      border: 4px solid rgba(255, 255, 255, 0.95);
-      background: rgba(255, 255, 255, 0.8);
-      color: #634ea5;
-      font-size: 28px;
-      font-weight: 900;
+      background: rgba(220,220,228,0.86);
+      color: #54459a;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+      font-size: 30px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+      border: 0;
       user-select: none;
-      -webkit-user-select: none;
       touch-action: none;
-    }
-
-    .ctrlBtn:active {
-      transform: translateY(2px);
-    }
-
-    @media (min-width: 900px) {
-      .ctrlBtn {
-        width: 84px;
-        height: 84px;
-        font-size: 30px;
-      }
     }
   </style>
 </head>
@@ -216,9 +161,9 @@
     <canvas id="game"></canvas>
 
     <div class="hud">
-      <div class="panel hearts" id="hearts">💖💖💖</div>
-      <div class="panel scoreBox" id="scoreBox">Stars: 0</div>
-      <div class="panel levelBox" id="levelBox">Level 1</div>
+      <div class="panel" id="hearts">💖💖💖</div>
+      <div class="panel" id="scoreBox">Stars: 0</div>
+      <div class="panel" id="levelBox">Level 1</div>
     </div>
 
     <div class="overlay" id="startScreen">
@@ -228,11 +173,9 @@
           Run, jump, collect stars, and hop through the magical rainbow portal.
           Just cute platforming fun.
         </p>
-        <div class="buttonRow">
-          <button class="primary" id="startBtn">Start Adventure</button>
-        </div>
+        <button id="startBtn">Start Adventure</button>
         <div class="smallNote">
-          Use left / right / jump. Falling loses a heart. Collect stars and reach the portal.
+          Use left / right / jump. Falling loses a heart.
         </div>
       </div>
     </div>
@@ -241,9 +184,7 @@
       <div class="card">
         <h1 class="title">Great Try!</h1>
         <p class="subtitle" id="gameOverText">You collected 0 stars.</p>
-        <div class="buttonRow">
-          <button class="primary" id="restartBtn">Play Again</button>
-        </div>
+        <button id="restartBtn">Play Again</button>
       </div>
     </div>
 
@@ -286,37 +227,37 @@
     };
 
     const player = {
-      x: 160,
+      x: 180,
       y: 0,
       w: 110,
       h: 110,
       vx: 0,
       vy: 0,
-      speed: 4.6,
-      jumpPower: -12.6,
+      speed: 4.8,
+      jumpPower: -12.5,
       onGround: false,
       facing: 1,
       animTimer: 0,
       frame: 0,
       hearts: 3,
       invuln: 0,
-      respawnX: 160,
+      respawnX: 180,
       respawnY: 0
     };
 
     let running = false;
     let score = 0;
-    let stars = [];
     let platforms = [];
+    let stars = [];
     let sparkles = [];
     let rainbowTrail = [];
-    let portal = null;
     let clouds = [];
+    let portal = null;
 
-    let spriteImage = new Image();
+    const spriteImage = new Image();
     let spriteLoaded = false;
-    let spriteCols = 6;
-    let spriteRows = 6;
+    const spriteCols = 6;
+    const spriteRows = 6;
     let frameW = 0;
     let frameH = 0;
 
@@ -329,8 +270,8 @@
       world.groundY = canvas.height - 180;
     }
 
-    window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     spriteImage.onload = () => {
       spriteLoaded = true;
@@ -339,8 +280,7 @@
     };
 
     spriteImage.onerror = () => {
-      console.warn("Could not load sprite sheet: assets/unicorn_rider_sheet.png");
-      spriteLoaded = false;
+      console.log("Sprite failed to load");
     };
 
     spriteImage.src = "assets/unicorn_rider_sheet.png";
@@ -361,115 +301,88 @@
     function makeLevel(levelNum) {
       world.level = levelNum;
       world.cameraX = 0;
-      stars = [];
       platforms = [];
+      stars = [];
       sparkles = [];
       rainbowTrail = [];
       clouds = [];
 
-      const viewW = canvas.width;
-      const levelLength = Math.max(4200, viewW * 3.8 + levelNum * 450);
+      const levelLength = Math.max(4200, canvas.width * 3.5);
       world.width = levelLength;
 
-      player.respawnX = 180;
-      player.respawnY = world.groundY - player.h;
-      resetPlayerPosition();
-
-      platforms.push({
-        x: 0,
-        y: world.groundY,
-        w: levelLength,
-        h: 180,
-        kind: "ground"
-      });
-
-      const baseY = world.groundY;
-
-      const gapBoost = Math.min((levelNum - 1) * 10, 40);
-      const layout = [
-        { x: 350,  y: baseY - 140, w: 230, h: 28 },
-        { x: 700 + gapBoost,  y: baseY - 260, w: 180, h: 28 },
-        { x: 1020 + gapBoost, y: baseY - 170, w: 220, h: 28 },
-        { x: 1360 + gapBoost, y: baseY - 310, w: 170, h: 28 },
-        { x: 1670 + gapBoost, y: baseY - 210, w: 220, h: 28 },
-        { x: 2010 + gapBoost, y: baseY - 120, w: 230, h: 28 },
-        { x: 2360 + gapBoost, y: baseY - 270, w: 180, h: 28 },
-        { x: 2680 + gapBoost, y: baseY - 170, w: 220, h: 28 },
-        { x: 3030 + gapBoost, y: baseY - 330, w: 170, h: 28 },
-        { x: 3330 + gapBoost, y: baseY - 220, w: 230, h: 28 },
-        { x: 3670 + gapBoost, y: baseY - 145, w: 240, h: 28 }
-      ];
-
-      for (const p of layout) {
-        platforms.push(p);
-      }
+      platforms.push({ x: 0, y: world.groundY, w: levelLength, h: 180, kind: "ground" });
+      platforms.push({ x: 340, y: world.groundY - 140, w: 220, h: 28 });
+      platforms.push({ x: 700, y: world.groundY - 240, w: 180, h: 28 });
+      platforms.push({ x: 1020, y: world.groundY - 160, w: 220, h: 28 });
+      platforms.push({ x: 1380, y: world.groundY - 290, w: 180, h: 28 });
+      platforms.push({ x: 1720, y: world.groundY - 180, w: 210, h: 28 });
+      platforms.push({ x: 2050, y: world.groundY - 110, w: 240, h: 28 });
+      platforms.push({ x: 2410, y: world.groundY - 250, w: 180, h: 28 });
+      platforms.push({ x: 2740, y: world.groundY - 170, w: 220, h: 28 });
+      platforms.push({ x: 3090, y: world.groundY - 310, w: 180, h: 28 });
+      platforms.push({ x: 3430, y: world.groundY - 210, w: 230, h: 28 });
 
       for (let i = 0; i < 40; i++) {
         const x = 260 + i * 92;
-        let y = baseY - 54;
+        let y = world.groundY - 60;
+        if (i % 4 === 0) y = world.groundY - 130;
+        if (i % 5 === 0) y = world.groundY - 190;
 
-        const platformAbove = platforms.find(
-          p => p.kind !== "ground" && x > p.x + 10 && x < p.x + p.w - 10
-        );
-
-        if (platformAbove && i % 2 === 0) {
-          y = platformAbove.y - 40;
-        } else if (i % 4 === 0) {
-          y = baseY - 120;
-        } else if (i % 5 === 0) {
-          y = baseY - 190;
+        for (const p of platforms) {
+          if (p.kind !== "ground" && x > p.x + 10 && x < p.x + p.w - 10) {
+            y = p.y - 40;
+            break;
+          }
         }
 
         stars.push({
-          x,
-          y,
-          r: 12,
-          collected: false,
-          bob: Math.random() * Math.PI * 2
+          x, y, r: 12, collected: false, bob: Math.random() * Math.PI * 2
         });
       }
 
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < 12; i++) {
         clouds.push({
           x: Math.random() * world.width,
-          y: 55 + Math.random() * 220,
+          y: 60 + Math.random() * 220,
           w: 110 + Math.random() * 140,
-          h: 28 + Math.random() * 26,
+          h: 30 + Math.random() * 24,
           speed: 0.06 + Math.random() * 0.12
         });
       }
 
       portal = {
-        x: world.width - 240,
-        y: baseY - 135,
+        x: world.width - 220,
+        y: world.groundY - 130,
         w: 90,
-        h: 125,
+        h: 120,
         pulse: 0
       };
 
+      player.respawnX = 180;
+      player.respawnY = world.groundY - player.h;
+      resetPlayerPosition();
       updateHud();
     }
 
     function startGame() {
+      running = true;
       score = 0;
       player.hearts = 3;
       player.invuln = 0;
       makeLevel(1);
       startScreen.classList.add("hidden");
       gameOverScreen.classList.add("hidden");
-      running = true;
       updateHud();
     }
 
     function endGame() {
       running = false;
-      gameOverText.textContent = `You collected ${score} stars and reached level ${world.level}.`;
+      gameOverText.textContent = `You collected ${score} stars.`;
       gameOverScreen.classList.remove("hidden");
     }
 
     function loseHeart() {
       if (player.invuln > 0) return;
-
       player.hearts -= 1;
       player.invuln = 90;
       updateHud();
@@ -492,33 +405,12 @@
 
     function addTrail() {
       rainbowTrail.push({
-        x: player.x + 14,
+        x: player.x + 8,
         y: player.y + player.h * 0.62,
-        life: 16,
-        w: 30,
-        h: 10
+        life: 14,
+        w: 28
       });
-
-      if (rainbowTrail.length > 80) {
-        rainbowTrail.shift();
-      }
-    }
-
-    function collectStar(star) {
-      star.collected = true;
-      score += 1;
-      updateHud();
-
-      for (let i = 0; i < 16; i++) {
-        sparkles.push({
-          x: star.x,
-          y: star.y,
-          vx: (Math.random() - 0.5) * 3.5,
-          vy: -Math.random() * 2.8 - 0.5,
-          life: 24 + Math.random() * 16,
-          size: 3 + Math.random() * 4
-        });
-      }
+      if (rainbowTrail.length > 100) rainbowTrail.shift();
     }
 
     function update() {
@@ -528,16 +420,12 @@
 
       const move = (controls.left ? -1 : 0) + (controls.right ? 1 : 0);
       player.vx = move * player.speed;
-
-      if (move !== 0) {
-        player.facing = move;
-      }
+      if (move !== 0) player.facing = move;
 
       if (controls.jumpPressed && player.onGround) {
         player.vy = player.jumpPower;
         player.onGround = false;
       }
-
       controls.jumpPressed = false;
 
       player.vy += world.gravity;
@@ -548,9 +436,7 @@
       for (const p of platforms) {
         const wasAbove = player.y + player.h - player.vy <= p.y;
         const overlapsX = player.x + player.w > p.x && player.x < p.x + p.w;
-        const touchesTop =
-          player.y + player.h >= p.y &&
-          player.y + player.h <= p.y + p.h + 16;
+        const touchesTop = player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + 18;
 
         if (wasAbove && overlapsX && touchesTop && player.vy >= 0) {
           player.y = p.y - player.h;
@@ -562,15 +448,11 @@
       if (player.x < 0) player.x = 0;
       if (player.x + player.w > world.width) player.x = world.width - player.w;
 
-      if (player.y > canvas.height + 220) {
-        loseHeart();
-      }
+      if (player.y > canvas.height + 220) loseHeart();
 
-      if (Math.abs(player.vx) > 0.1 || !player.onGround) {
-        addTrail();
-      }
+      if (Math.abs(player.vx) > 0.1 || !player.onGround) addTrail();
 
-      player.animTimer += 1;
+      player.animTimer++;
       if (player.animTimer >= 7) {
         player.animTimer = 0;
         player.frame = (player.frame + 1) % 6;
@@ -579,16 +461,21 @@
       for (const s of stars) {
         if (s.collected) continue;
         s.bob += 0.08;
-
-        const starBox = {
-          x: s.x - s.r,
-          y: s.y - s.r,
-          w: s.r * 2,
-          h: s.r * 2
-        };
-
+        const starBox = { x: s.x - s.r, y: s.y - s.r, w: s.r * 2, h: s.r * 2 };
         if (rectsOverlap(player, starBox)) {
-          collectStar(s);
+          s.collected = true;
+          score++;
+          updateHud();
+          for (let i = 0; i < 14; i++) {
+            sparkles.push({
+              x: s.x,
+              y: s.y,
+              vx: (Math.random() - 0.5) * 3.2,
+              vy: -Math.random() * 2.5 - 0.5,
+              life: 22 + Math.random() * 12,
+              size: 3 + Math.random() * 3
+            });
+          }
         }
       }
 
@@ -596,13 +483,13 @@
         const sp = sparkles[i];
         sp.x += sp.vx;
         sp.y += sp.vy;
-        sp.vy += 0.06;
-        sp.life -= 1;
+        sp.vy += 0.05;
+        sp.life--;
         if (sp.life <= 0) sparkles.splice(i, 1);
       }
 
       for (let i = rainbowTrail.length - 1; i >= 0; i--) {
-        rainbowTrail[i].life -= 1;
+        rainbowTrail[i].life--;
         if (rainbowTrail[i].life <= 0) rainbowTrail.splice(i, 1);
       }
 
@@ -614,6 +501,15 @@
       const targetCam = player.x - canvas.width * 0.35;
       world.cameraX += (targetCam - world.cameraX) * 0.08;
       world.cameraX = Math.max(0, Math.min(world.cameraX, world.width - canvas.width));
+    }
+
+    function drawCloud(x, y, w, h) {
+      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.beginPath();
+      ctx.ellipse(x + w * 0.2, y + h * 0.65, w * 0.2, h * 0.35, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w * 0.48, y + h * 0.45, w * 0.29, h * 0.46, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + w * 0.76, y + h * 0.64, w * 0.22, h * 0.32, 0, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     function drawRoundedRect(x, y, w, h, r, fill) {
@@ -632,52 +528,36 @@
       ctx.fill();
     }
 
-    function drawCloud(x, y, w, h) {
-      ctx.fillStyle = "rgba(255,255,255,0.84)";
-      ctx.beginPath();
-      ctx.ellipse(x + w * 0.2, y + h * 0.65, w * 0.2, h * 0.35, 0, 0, Math.PI * 2);
-      ctx.ellipse(x + w * 0.48, y + h * 0.45, w * 0.29, h * 0.46, 0, 0, Math.PI * 2);
-      ctx.ellipse(x + w * 0.76, y + h * 0.64, w * 0.22, h * 0.32, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
     function drawPlatform(p) {
       const x = p.x - world.cameraX;
       const y = p.y;
 
       if (p.kind === "ground") {
-        ctx.fillStyle = "#83dc66";
+        ctx.fillStyle = "#84db65";
         ctx.fillRect(x, y, p.w, p.h);
 
         for (let i = 0; i < p.w; i += 42) {
           ctx.fillStyle = "#5fc64d";
           ctx.fillRect(x + i, y, 24, 18);
-          ctx.fillStyle = "#a5f08a";
+          ctx.fillStyle = "#a6ef86";
           ctx.fillRect(x + i + 5, y + 4, 10, 10);
         }
-
-        ctx.fillStyle = "#8e69db";
+        ctx.fillStyle = "#8f69d8";
         ctx.fillRect(x, y + 18, p.w, 8);
         return;
       }
 
-      drawRoundedRect(x, y, p.w, p.h, 12, "#ffe9ff");
-      ctx.fillStyle = "#ff86d1";
+      drawRoundedRect(x, y, p.w, p.h, 12, "#ffe8ff");
+      ctx.fillStyle = "#ff87d1";
       ctx.fillRect(x, y + p.h - 8, p.w, 8);
-
-      ctx.fillStyle = "#fff";
-      for (let i = 0; i < p.w; i += 22) {
-        ctx.fillRect(x + i + 5, y + 4, 8, 10);
-      }
     }
 
     function drawStar(s) {
       const x = s.x - world.cameraX;
       const y = s.y + Math.sin(s.bob) * 5;
-
       ctx.save();
       ctx.translate(x, y);
-      ctx.fillStyle = "#ffd84e";
+      ctx.fillStyle = "#ffd84f";
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
         const outer = i * Math.PI * 2 / 5 - Math.PI / 2;
@@ -692,27 +572,21 @@
 
     function drawSparkles() {
       for (const sp of sparkles) {
-        ctx.globalAlpha = Math.max(0, sp.life / 36);
-        ctx.fillStyle = "#fff6ab";
+        ctx.globalAlpha = Math.max(0, sp.life / 34);
+        ctx.fillStyle = "#fff7aa";
         ctx.fillRect(sp.x - world.cameraX, sp.y, sp.size, sp.size);
       }
       ctx.globalAlpha = 1;
     }
 
     function drawRainbowTrail() {
-      const colors = ["#ff5f9e", "#ffb84f", "#fff36a", "#71e56d", "#60b8ff", "#b56cff"];
-
+      const colors = ["#ff5fa8","#ffb44f","#fff36c","#72e56c","#60b7ff","#b56dff"];
       for (const t of rainbowTrail) {
-        const alpha = t.life / 16;
+        const a = t.life / 14;
         for (let i = 0; i < colors.length; i++) {
-          ctx.globalAlpha = alpha * 0.7;
+          ctx.globalAlpha = a * 0.7;
           ctx.fillStyle = colors[i];
-          ctx.fillRect(
-            t.x - world.cameraX,
-            t.y + i * 3,
-            t.w,
-            3
-          );
+          ctx.fillRect(t.x - world.cameraX, t.y + i * 3, t.w, 3);
         }
       }
       ctx.globalAlpha = 1;
@@ -724,4 +598,139 @@
       const pulse = Math.sin(portal.pulse) * 4;
 
       ctx.save();
-      ctx.translate(x + portal.w / 2, y + portal.h /
+      ctx.translate(x + portal.w / 2, y + portal.h / 2);
+      ctx.strokeStyle = "#8b5cff";
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 28 + pulse, 48 + pulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#ff69c6";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 18 + pulse * 0.5, 36 + pulse * 0.5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPlayer() {
+      const px = player.x - world.cameraX;
+      const py = player.y;
+
+      if (!spriteLoaded) {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(px, py, player.w, player.h);
+        return;
+      }
+
+      let sx = 0;
+      let sy = 0;
+
+      if (!player.onGround) {
+        sx = 0;
+        sy = 2;
+      } else if (Math.abs(player.vx) > 0.1) {
+        sx = player.frame % 6;
+        sy = 0;
+      } else {
+        sx = 0;
+        sy = 0;
+      }
+
+      ctx.save();
+
+      if (player.invuln > 0 && Math.floor(player.invuln / 4) % 2 === 0) {
+        ctx.globalAlpha = 0.45;
+      }
+
+      if (player.facing < 0) {
+        ctx.translate(px + player.w / 2, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-(px + player.w / 2), 0);
+      }
+
+      ctx.drawImage(
+        spriteImage,
+        sx * frameW,
+        sy * frameH,
+        frameW,
+        frameH,
+        px,
+        py,
+        player.w,
+        player.h
+      );
+
+      ctx.restore();
+    }
+
+    function render() {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGrad.addColorStop(0, "#76d3ff");
+      skyGrad.addColorStop(0.55, "#d5f4ff");
+      skyGrad.addColorStop(1, "#f3e7ff");
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (const cloud of clouds) {
+        drawCloud(cloud.x - world.cameraX * cloud.speed, cloud.y, cloud.w, cloud.h);
+      }
+
+      for (const p of platforms) drawPlatform(p);
+      for (const s of stars) if (!s.collected) drawStar(s);
+      drawRainbowTrail();
+      drawSparkles();
+      drawPortal();
+      drawPlayer();
+    }
+
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function holdButton(id, key) {
+      const el = document.getElementById(id);
+      const on = (e) => {
+        e.preventDefault();
+        controls[key] = true;
+      };
+      const off = (e) => {
+        e.preventDefault();
+        controls[key] = false;
+      };
+      el.addEventListener("pointerdown", on);
+      el.addEventListener("pointerup", off);
+      el.addEventListener("pointerleave", off);
+      el.addEventListener("pointercancel", off);
+    }
+
+    holdButton("leftBtn", "left");
+    holdButton("rightBtn", "right");
+
+    document.getElementById("jumpBtn").addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      controls.jumpPressed = true;
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "ArrowLeft" || e.code === "KeyA") controls.left = true;
+      if (e.code === "ArrowRight" || e.code === "KeyD") controls.right = true;
+      if (e.code === "ArrowUp" || e.code === "KeyW" || e.code === "Space") controls.jumpPressed = true;
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.code === "ArrowLeft" || e.code === "KeyA") controls.left = false;
+      if (e.code === "ArrowRight" || e.code === "KeyD") controls.right = false;
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+
+    makeLevel(1);
+    render();
+    gameLoop();
+  </script>
+</body>
+</html>
